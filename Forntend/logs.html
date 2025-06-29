@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Conversion Logs</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f9fafb;
+      margin: 0;
+      padding: 30px;
+    }
+    h2 {
+      text-align: center;
+      color: #111827;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 30px;
+      background: #ffffff;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
+    th, td {
+      padding: 15px;
+      border-bottom: 1px solid #e5e7eb;
+      text-align: left;
+    }
+    th {
+      background-color: #f3f4f6;
+      color: #374151;
+    }
+    tr:hover {
+      background-color: #f9fafb;
+    }
+    .status {
+      font-weight: bold;
+      text-transform: capitalize;
+    }
+    .status.converted {
+      color: green;
+    }
+    .status.error {
+      color: red;
+    }
+    .status.conversion_started {
+      color: orange;
+    }
+    .download-btn {
+      padding: 6px 12px;
+      background-color: #3b82f6;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .download-btn:hover {
+      background-color: #2563eb;
+    }
+  </style>
+</head>
+<body>
+  <h2>File Conversion Logs</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Filename</th>
+        <th>Status</th>
+        <th>Time</th>
+        <th>Download</th>
+      </tr>
+    </thead>
+    <tbody id="logRows">
+      <tr><td colspan="4" style="text-align:center;">Loading...</td></tr>
+    </tbody>
+  </table>
+
+  <script>
+    async function loadLogs() {
+      try {
+        const res = await fetch('https://iwaftjp9jc.execute-api.eu-north-1.amazonaws.com/logs');
+        const logs = await res.json();
+        const logRows = document.getElementById("logRows");
+        logRows.innerHTML = "";
+
+        logs.forEach(log => {
+          const row = document.createElement("tr");
+
+          const fileNameCell = document.createElement("td");
+          fileNameCell.textContent = log.fileId;
+
+          const statusCell = document.createElement("td");
+          statusCell.textContent = log.status;
+          statusCell.className = `status ${log.status}`;
+
+          const timeCell = document.createElement("td");
+          timeCell.textContent = new Date(log.timestamp * 1000).toLocaleString();
+
+          const downloadCell = document.createElement("td");
+
+          if (log.status === "converted") {
+            const encodedKey = encodeURIComponent(log.convertedFile || log.fileId.replace(".to_", "."));
+            downloadCell.innerHTML = `
+              <a class="download-btn" href="#" onclick="trackAndDownload('${encodedKey}', this)">
+                Download
+              </a>
+              <br/><small>(${log.downloadCount || 0} downloads)</small>
+            `;
+          } else {
+            downloadCell.textContent = "Not available";
+          }
+
+          row.appendChild(fileNameCell);
+          row.appendChild(statusCell);
+          row.appendChild(timeCell);
+          row.appendChild(downloadCell);
+          logRows.appendChild(row);
+        });
+
+      } catch (error) {
+        console.error("Error loading logs:", error);
+        document.getElementById("logRows").innerHTML = `
+          <tr><td colspan='4' style='text-align:center;color:red;'>Failed to load logs.</td></tr>
+        `;
+      }
+    }
+
+    async function trackAndDownload(key, element) {
+      try {
+        const res = await fetch(`https://8a1s6y1tqi.execute-api.eu-north-1.amazonaws.com/download?key=${key}`);
+        const data = await res.json();
+
+        if (data.url) {
+          window.open(data.url, '_blank');
+          loadLogs(); // refresh download count
+        } else {
+          alert("Failed to get download link.");
+        }
+      } catch (err) {
+        console.error("Download error:", err);
+        alert("⚠️ Failed to track or fetch download.");
+      }
+    }
+
+    window.onload = loadLogs;
+  </script>
+</body>
+</html>

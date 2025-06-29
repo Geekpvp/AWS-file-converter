@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Cloud File Converter</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      padding: 2em;
+      max-width: 600px;
+      margin: auto;
+    }
+    h2 {
+      color: #333;
+    }
+    .card {
+      background: white;
+      padding: 2em;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    input[type="file"],
+    select,
+    button {
+      width: 100%;
+      padding: 0.75em;
+      margin: 0.5em 0 1em;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 1em;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    #status, #error {
+      margin-top: 1em;
+      font-weight: bold;
+    }
+    #status {
+      color: green;
+    }
+    #error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Upload a File for Conversion</h2>
+
+    <input type="file" id="fileInput" onchange="updateFormatOptions()" />
+
+    <label>Convert to:</label>
+    <select id="formatSelect"></select>
+
+    <button onclick="upload()">Upload & Convert</button>
+
+    <p id="status"></p>
+    <p id="error"></p>
+  </div>
+
+  <script>
+    const allowedConversions = {
+      docx: ['pdf', 'odt', 'txt', 'jpg', 'png'],
+      odt:  ['pdf', 'docx', 'txt', 'jpg', 'png'],
+      pptx: ['pdf', 'jpg', 'png'],
+      xlsx: ['pdf'],
+      txt:  ['pdf', 'docx', 'odt'],
+      pdf:  ['odt', 'txt'],  // docx and images removed for safety
+      jpg:  ['pdf'],
+      png:  ['pdf']
+    };
+
+    function updateFormatOptions() {
+      const fileInput = document.getElementById("fileInput");
+      const formatSelect = document.getElementById("formatSelect");
+      const error = document.getElementById("error");
+      const status = document.getElementById("status");
+
+      formatSelect.innerHTML = "";
+      error.innerText = "";
+      status.innerText = "";
+
+      const file = fileInput.files[0];
+      if (!file) return;
+
+      const ext = file.name.split('.').pop().toLowerCase();
+      const options = allowedConversions[ext];
+
+      if (!options) {
+        error.innerText = `❌ Unsupported file type: .${ext}`;
+        return;
+      }
+
+      for (const fmt of options) {
+        const option = document.createElement("option");
+        option.value = fmt;
+        option.innerText = fmt.toUpperCase();
+        formatSelect.appendChild(option);
+      }
+    }
+
+    async function upload() {
+      const file = document.getElementById("fileInput").files[0];
+      const format = document.getElementById("formatSelect").value;
+      const status = document.getElementById("status");
+      const error = document.getElementById("error");
+
+      if (!file || !format) {
+        error.innerText = "❌ Please select a file and a format.";
+        return;
+      }
+
+      status.innerText = "Requesting upload URL...";
+      error.innerText = "";
+
+      try {
+        const response = await fetch(
+          `https://farxof3y23.execute-api.eu-north-1.amazonaws.com/get-upload-url?filename=${encodeURIComponent(file.name)}&format=${format}`
+        );
+        const data = await response.json();
+
+        if (!data.uploadUrl) {
+          error.innerText = "❌ Failed to get upload URL.";
+          return;
+        }
+
+        status.innerText = "Uploading...";
+        await fetch(data.uploadUrl, {
+          method: "PUT",
+          body: file
+        });
+
+        status.innerText = `✅ Uploaded! You'll get an email when it's converted.`;
+      } catch (err) {
+        error.innerText = "❌ Upload failed.";
+        console.error(err);
+      }
+    }
+  </script>
+</body>
+</html>

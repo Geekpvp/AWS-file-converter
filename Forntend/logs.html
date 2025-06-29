@@ -75,10 +75,10 @@
     </tbody>
   </table>
 
-  <script>
+  <script> 
     async function loadLogs() {
       try {
-        const res = await fetch('https://iwaftjp9jc.execute-api.eu-north-1.amazonaws.com/logs');
+        const res = await fetch('https://YOUR_API_ID.execute-api.eu-north-1.amazonaws.com/logs');
         const logs = await res.json();
         const logRows = document.getElementById("logRows");
         logRows.innerHTML = "";
@@ -87,7 +87,7 @@
           const row = document.createElement("tr");
 
           const fileNameCell = document.createElement("td");
-          fileNameCell.textContent = log.fileId;
+          fileNameCell.textContent = log.fileId; 
 
           const statusCell = document.createElement("td");
           statusCell.textContent = log.status;
@@ -127,18 +127,18 @@
 
     async function trackAndDownload(key, element) {
       try {
-        const res = await fetch(`https://8a1s6y1tqi.execute-api.eu-north-1.amazonaws.com/download?key=${key}`);
+        const res = await fetch(`https://YOUR_API_ID.execute-api.eu-north-1.amazonaws.com/download?key=${key}`);
         const data = await res.json();
 
         if (data.url) {
           window.open(data.url, '_blank');
-          loadLogs(); // refresh download count
+          loadLogs();
         } else {
           alert("Failed to get download link.");
         }
       } catch (err) {
         console.error("Download error:", err);
-        alert("⚠️ Failed to track or fetch download.");
+        alert("Failed to track or fetch download.");
       }
     }
 

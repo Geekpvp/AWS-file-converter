@@ -14,14 +14,14 @@ A serverless document converter using AWS Lambda, S3, DynamoDB, EC2 + LibreOffic
 - HTML frontend
 
 ## Frontend
-- `index.html` to upload
+- `index.html` to upload + download
 - `logs.html` to view logs + download
 
 ## How to Deploy
 1. Upload HTML to S3 static website
 2. Deploy Lambda functions
 3. Set up DynamoDB + EC2
-4. Permissions:Don't forget to attach some of following IAM permissions:
+4. Add permissions: some of following IAM permissions:
         sns:Publish
         dynamodb:GetItem
         dynamodb:UpdateItem

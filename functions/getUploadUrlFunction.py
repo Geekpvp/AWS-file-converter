@@ -29,7 +29,7 @@ def lambda_handler(event, context):
         return error_response("Missing filename parameter")
 
     # Extract source extension
-    source_ext = os.path.splitext(filename)[-1][1:].lower()  # e.g., '.docx' → 'docx'
+    source_ext = os.path.splitext(filename)[-1][1:].lower()
 
     if source_ext not in allowed_conversions:
         return error_response(f"Source format .{source_ext} is not supported")
@@ -37,7 +37,7 @@ def lambda_handler(event, context):
     if target_format not in allowed_conversions[source_ext]:
         return error_response(f"Conversion from .{source_ext} to .{target_format} is not supported")
 
-    # Clean & encode
+
     parsed_name = urllib.parse.quote_plus(filename)
     key = f"{parsed_name}.to_{target_format}"
 

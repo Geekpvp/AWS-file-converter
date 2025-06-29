@@ -95,7 +95,7 @@
       const options = allowedConversions[ext];
 
       if (!options) {
-        error.innerText = `❌ Unsupported file type: .${ext}`;
+        error.innerText = ` Unsupported file type: .${ext}`;
         return;
       }
 
@@ -114,7 +114,7 @@
       const error = document.getElementById("error");
 
       if (!file || !format) {
-        error.innerText = "❌ Please select a file and a format.";
+        error.innerText = " Please select a file and a format.";
         return;
       }
 
@@ -123,12 +123,12 @@
 
       try {
         const response = await fetch(
-          `https://farxof3y23.execute-api.eu-north-1.amazonaws.com/get-upload-url?filename=${encodeURIComponent(file.name)}&format=${format}`
+          `https://YOUR_API_ID.execute-api.eu-north-1.amazonaws.com/get-upload-url?filename=${encodeURIComponent(file.name)}&format=${format}`
         );
         const data = await response.json();
 
         if (!data.uploadUrl) {
-          error.innerText = "❌ Failed to get upload URL.";
+          error.innerText = " Failed to get upload URL.";
           return;
         }
 
@@ -138,9 +138,9 @@
           body: file
         });
 
-        status.innerText = `✅ Uploaded! You'll get an email when it's converted.`;
+        status.innerText = ` Uploaded! You'll get an email when it's converted.`;
       } catch (err) {
-        error.innerText = "❌ Upload failed.";
+        error.innerText = " Upload failed.";
         console.error(err);
       }
     }

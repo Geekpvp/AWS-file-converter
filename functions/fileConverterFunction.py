@@ -23,7 +23,6 @@ def lambda_handler(event, context):
     key = urllib.parse.unquote_plus(event['Records'][0]['s3']['object']['key'])
 
     if '.to_' not in key:
-        print("Key does not contain '.to_' format. Skipping.")
         return {'statusCode': 400, 'body': 'Invalid file key format'}
 
     original_filename = key.split('.to_')[0]  
